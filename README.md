@@ -16,7 +16,7 @@
 - This is exploring how to post complex data using JSON and XML via Postman.
 - KT: July 9 2024
 
-## 4.REST-04-JsonXml-ToCollectionofObject-RequestBody
+## 4.REST-04-JsonXml-Collections-RequestBody
 
 ### Description:
 - This is exploring how to post complex Collection of data using JSON and XML via Postman.
