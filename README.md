@@ -22,4 +22,10 @@
 - This is exploring how to post complex Collection of data using JSON and XML via Postman.
 - KT: July 9 2024
 
+## 5.REST-05-RqstParamPthVrble
+- This is exploring different scenario related to RequestParam and PathVariable Annotation.
+- KT: July 10 2024
+
+
+
 
