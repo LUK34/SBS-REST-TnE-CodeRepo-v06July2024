@@ -1,0 +1,267 @@
+package kw.kng.controller;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import kw.kng.dto.TouristDto;
+import kw.kng.exceptions.GenericException;
+import kw.kng.service.TouristService;
+
+@Tag(
+		name="Tourist REST API  CRUD Swagger 3.3.1 Documentation",
+		description="Tourist REST API  CRUD Swagger 3.3.1 Documentation - Create Single-Multiple tourist,"
+				+ "fetch tourist details, fetch tourist details by 3 city names, fetch tourist by id,"
+				+ "update tourist by id, patch update the budget by id and percentage,"
+				+ "delete tourist by id, delete tourist by budget by budget range"
+)
+@RestController
+@RequestMapping("/tourist")
+public class TouristController
+{
+
+	private TouristService ts;
+
+	public TouristController(TouristService ts) 
+	{
+		this.ts = ts;
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------
+	@Operation(
+			summary="Create Single Tourist REST API",
+			description="Create Single Tourist REST API is used to save tourist details in a DB"
+	)
+	@ApiResponse(
+			responseCode="201",
+			description="HTTP Status 201 Created"
+	)
+	@PostMapping("/create-single")
+	public ResponseEntity<String> createTourist_Single(@RequestBody @Valid TouristDto touristDto)
+	{
+		try 
+		{
+			TouristDto savedTouristDto= ts.registerTourist_Single(touristDto);
+			
+			return new ResponseEntity<>("Tourist with id: "+savedTouristDto.getTid()+" saved into DB !!!", HttpStatus.CREATED);
+			
+		}
+		catch (Exception e)
+		{
+			throw new GenericException("Not able to save single Tourist record into DB!!!");
+		}
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------	
+	
+	@Operation(
+			summary="Create Multiple Tourist REST API",
+			description="Create Multiple Tourist REST API is used to save  tourist list details in a DB"
+	)
+	@ApiResponse(
+			responseCode="201",
+			description="HTTP Status 201 Created"
+	)
+	@PostMapping("/create-multiple")
+	public ResponseEntity<String> createTourist_Multiple(@RequestBody @Valid List<@Valid TouristDto> touristDto)
+	{
+		
+		try 
+		{
+			List<TouristDto> savedTouristDto= ts.registerTourist_Multiple(touristDto);
+			List<Long> savedTouristIds = savedTouristDto.stream().map(TouristDto::getTid).collect(Collectors.toList());
+			return new ResponseEntity<>("List of Tourists with ids:{"+savedTouristIds+"}are saved into DB.",HttpStatus.CREATED);
+		}
+		catch(Exception e)
+		{
+			throw new GenericException("Not able to save multiple Tourist record into DB!!!");
+		}
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------	
+	
+	@Operation(
+			summary="Find all Tourist Detail REST API",
+			description="Find all Tourist Detail REST API"
+	)
+	@ApiResponse(
+			responseCode="200",
+			description="HTTP Status 200 OK"
+	)
+	@GetMapping("/findAll")
+	public ResponseEntity<?> displayTourist()
+	{
+		try 
+		{
+			List<TouristDto> listy =ts.fetchAllTourists();
+			return new ResponseEntity<List<TouristDto>>(listy, HttpStatus.OK);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return new ResponseEntity<String>("Exception occured while fetching data.", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------	
+
+	@Operation(
+			summary="Find all Tourist Detail by 3 city names REST API",
+			description="Find all Tourist Detail by 3 city names REST API"
+	)
+	@ApiResponse(
+			responseCode="200",
+			description="HTTP Status 200 OK"
+	)
+	@GetMapping("/findAll/{city1}/{city2}/{city3}")
+	public ResponseEntity<?> fetchTouristByCity(@PathVariable(required=false) String city1,
+												@PathVariable(required=false) String city2,
+												@PathVariable(required=false) String city3)
+	{
+		try 
+		{
+			List<TouristDto> listy =ts.fetchAllTouristByCities(city1, city2,city3);
+			return new ResponseEntity<List<TouristDto>>(listy, HttpStatus.OK);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return new ResponseEntity<String>("Exception occured while fetching data.", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------	
+	
+	@Operation(
+			summary="Find all Tourist Detail by id REST API",
+			description="Find all Tourist Detail by id REST API"
+	)
+	@ApiResponse(
+			responseCode="200",
+			description="HTTP Status 200 OK"
+	)
+	@GetMapping("/findById/{id}")
+	public ResponseEntity<?> displayTouristById(@PathVariable("id") Long id)
+	{
+		
+			TouristDto tourist = ts.fetchTouristById(id);
+			return new ResponseEntity<TouristDto>(tourist, HttpStatus.OK);
+	
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------	
+	
+	@Operation(
+			summary="Update Tourist Detail by id REST API",
+			description="Update Tourist Detail by id REST API"
+	)
+	@ApiResponse(
+			responseCode="200",
+			description="HTTP Status 200 OK"
+	)
+	@PutMapping("/updateById/{id}")
+	public ResponseEntity<?> updateTouristDetailsByid(@PathVariable("id") Long id, @RequestBody @Valid TouristDto touristDto)
+	{
+		
+			TouristDto toury = ts.updateTouristDetails(id, touristDto);
+			return ResponseEntity.ok(toury);
+					
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------	
+	
+	@Operation(
+			summary="Patch Update Tourist budget by id and percentage REST API",
+			description="Patch Update Tourist budget by id and percentage REST API"
+	)
+	@ApiResponse(
+			responseCode="200",
+			description="HTTP Status 200 OK"
+	)
+	@PatchMapping("/patchupdate/{id}/{percentage}")
+	public ResponseEntity<?> modifyTouristBudgetDetailsById(@PathVariable("id") long id, @PathVariable("percentage") double percentage)
+	{
+			TouristDto toury= ts.updateTouristBudegtById(id, percentage);
+			return ResponseEntity.ok(toury);
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------	
+	
+	@Operation(
+			summary="Delete Tourist by id REST API",
+			description="Delete Tourist by id REST API"
+	)
+	@ApiResponse(
+			responseCode="200",
+			description="HTTP Status 200 OK"
+	)
+	@DeleteMapping("/deleteById/{id}")
+	public ResponseEntity<?> deleteTouristById(@PathVariable("id") Long id)
+	{	
+			 ts.deleteTouristById(id);
+			 return ResponseEntity.ok("Tourist with id: "+id+" deleted successfully from DB!!!");
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------	
+	
+	@Operation(
+			summary="Delete Tourist by budget range REST API",
+			description="Delete Tourist by budget range REST API"
+	)
+	@ApiResponse(
+			responseCode="200",
+			description="HTTP Status 200 OK"
+	)
+	@DeleteMapping("/deleteByBudgetRange/{start}/{end}")
+	public ResponseEntity<?> deleteTouristByRange(@PathVariable("start") double start,
+												  @PathVariable("end") double end)
+	{
+		try 
+		{
+			String resultMsg=ts.removeTouristsByBudgetRange(start, end);
+			return new ResponseEntity<String>(resultMsg, HttpStatus.OK);
+		}
+		catch(Exception e)
+		{
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------	
+	
+	@Operation(
+			summary="Find Tourist by budget range REST API",
+			description="Find Tourist by budget range REST API"
+	)
+	@ApiResponse(
+			responseCode="200",
+			description="HTTP Status 200 OK"
+	)
+	@GetMapping("/findByBudgetRange/{start}/{end}")
+	public ResponseEntity<?> selectTouristByRange(@PathVariable("start") double start,
+												  @PathVariable("end") double end)
+	{
+		try 
+		{
+			List<TouristDto> listy =ts.fetchTouristByBudgetRange(start, end);
+			return new ResponseEntity<List<TouristDto>>(listy, HttpStatus.OK);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return new ResponseEntity<String>("Exception occured while fetching data.", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+// ------------------------------------------------------------------------------------------------------------------------------------	
+	
+	
+	
+	
+}
