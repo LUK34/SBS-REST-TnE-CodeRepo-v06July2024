@@ -28,6 +28,11 @@
 - This is exploring different scenario related to RequestParam and PathVariable Annotation.
 - KT: July 10 2024
 
+## 6.REST-06-CRUD
 
-
+### Description:
+- Followed Ramesh Fadatarer logic. But in controller layer I am using String and ResponseEntity<?>. The contoller part is different
+- ModelMapper applied here
+- Exception applied here
+- KT: July 11 and 12 2024
 
